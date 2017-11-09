@@ -1,6 +1,8 @@
 import os
 import glob
 import time
+import datetime
+import web_component 
 
 os.system('modprobe w1-gpio')
 os.system('modprobe w1-therm')
@@ -24,8 +26,9 @@ def read_temp():
 		if temp_output != -1:
 			temp_string = lines[1].strip()[temp_output+2:]
 			temp_c = float(temp_string)/1000.0
-			temp_f = temp_c * 9.0/5.0+32.0
-			return temp_c, temp_f
+			dt = datetime.datetime.now()
+			json_data = web_component.jsonify(dt, temp_c)
+			web_component.post_data(json_data)
 
 while True:
 	print(read_temp())
