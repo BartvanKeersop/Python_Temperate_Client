@@ -13,8 +13,8 @@ os.system('modprobe w1-gpio')
 os.system('modprobe w1-therm')
 
 # global variables
-global api_url = 'https://requestb.in/1ck7q7q1'
-global temp_sensor = '/sys/bus/w1/devices/28-0000082a2680/w1_slave'
+api_url = 'http://jim-express-api.azurewebsites.net/data'
+temp_sensor  = '/sys/bus/w1/devices/28-0000082a2680/w1_slave'
 
 # reads and converts the sensor data.
 # returns: current time as datetime
@@ -28,8 +28,8 @@ def read_temp():
 		if temp_output != -1:
 			temp_string = lines[1].strip()[temp_output+2:]
 			temp_c = float(temp_string)/1000.0
-			dt = datetime.datetime.now()
-            return dt, temp_c
+			dt = datetime.datetime.now() 
+			return dt, temp_c
 
 # helper function for read_temp
 # reads the raw sensor data
@@ -43,8 +43,8 @@ def temp_raw():
 # arg1: time as datetime
 # arg2: measured temperature as string
 def post_data(time, temp_c):
-    data = jsonify(time, temp_c)
-	url = 'https://requestb.in/1ck7q7q1'
+	data = jsonify(time, temp_c)
+	url = api_url 
 	headers = {'accept': 'application/json','content-type': 'application/json'}  
 	r = requests.post(url, data = data, headers = headers)
 
@@ -53,11 +53,15 @@ def post_data(time, temp_c):
 # arg1: time as datetime
 # arg2: measured temperature as string
 def jsonify(time, temp_c):
-	data = '{\'time\':\'%s\',\'temp\':\'%s\'}' % (time, temp_c)
+	#data = '{\'time\':%s, \'temp\': %s }' % (time, temp_c)
+	data = '{ \"tmp": %s }' % (temp_c)  
 	return data
 
 # loop to keep the function running
 # sends data to api every <argument> seconds
 while True:
-    post_data(read_temp())
-	time.sleep(sys.argv[1])
+	dt, temp_c = read_temp()
+	print dt
+	print temp_c
+	post_data(dt, temp_c)
+	time.sleep(1)
